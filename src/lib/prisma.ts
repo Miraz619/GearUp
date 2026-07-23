@@ -1,3 +1,11 @@
-
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../generated/prisma/client";
-export const prisma = new PrismaClient();
+import config from "../config";
+
+const adapter = new PrismaPg({
+  connectionString: config.database_url!,
+});
+
+export const prisma = new PrismaClient({
+  adapter,
+});
