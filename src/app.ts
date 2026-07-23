@@ -5,6 +5,9 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import router from "./routes";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler";
+import config from "./config";
 
 const app: Application = express();
 
@@ -14,7 +17,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: true,
+    origin: config.app_url || "*",
     credentials: true,
   }),
 );
@@ -25,5 +28,7 @@ app.get("/", (req: Request, res: Response) => {
     message: "GearUp API is running",
   });
 });
+app.use("/api", router);
 
+app.use(globalErrorHandler);
 export default app;

@@ -11,8 +11,7 @@ const config = {
   jwt_secret: process.env.JWT_SECRET,
   jwt_expires_in: process.env.JWT_EXPIRES_IN,
 
-  bcrypt_salt_rounds:
-    process.env.BCRYPT_SALT_ROUNDS,
+  bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
 
   app_url: process.env.APP_URL,
 };
