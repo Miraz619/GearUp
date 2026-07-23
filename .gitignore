@@ -4,3 +4,7 @@ dist
 .vercel
 /src/generated/prisma
 /generated/prisma/
+
+.agents/
+.claude/
+.windsurf/
