@@ -1,16 +1,23 @@
 import app from "./app";
+import "dotenv/config";
 
-const port = Number(process.env.PORT) || 5000;
+import config from "./config";
 
-const startServer = async () => {
+const PORT = config.port;
+
+async function main() {
   try {
-    app.listen(port, () => {
-      console.log(`GearUp server is running on port ${port}`);
+  
+    console.log("connected database successfully");
+    app.listen(PORT, () => {
+      console.log(`server is running on port ${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    
+    console.error("Error starting the server", error);
+  
     process.exit(1);
   }
-};
+}
 
-startServer();
+main();
