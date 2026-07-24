@@ -1,8 +1,7 @@
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import {
-  ICreateCategory,
-  IUpdateCategory,
+  ICreateCategory
 } from "./category.interface";
 
 const createCategory = async (payload: ICreateCategory) => {
@@ -54,10 +53,57 @@ const getAllCategories = async () => {
   return result;
 };
 
+const getSingleCategory = async (categoryId: string) => {
+  const result = await prisma.category.findUniqueOrThrow({
+    where: {
+      id: categoryId,
+    },
+  });
 
+  return result;
+};
+
+
+
+const deleteCategory = async (categoryId: string) => {
+  const category = await prisma.category.findUniqueOrThrow({
+    where: {
+      id: categoryId,
+    },
+    include: {
+      _count: {
+        select: {
+          gearItems: true,
+        },
+      },
+    },
+  });
+
+  if (category._count.gearItems > 0) {
+    const error = new Error(
+      "This category cannot be deleted because it contains gear items",
+    ) as Error & {
+      statusCode: number;
+    };
+
+    error.statusCode = httpStatus.CONFLICT;
+
+    throw error;
+  }
+
+  const result = await prisma.category.delete({
+    where: {
+      id: categoryId,
+    },
+  });
+
+  return result;
+};
 
 export const CategoryService = {
   createCategory,
   getAllCategories,
+  getSingleCategory,
+  deleteCategory
  
 };

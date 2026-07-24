@@ -5,7 +5,3 @@ export interface ICreateCategory {
   description?: string;
 }
 
-export interface IUpdateCategory {
-  name?: string;
-  description?: string;
-}
