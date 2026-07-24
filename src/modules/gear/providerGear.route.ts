@@ -6,5 +6,6 @@ import { GearController } from "./gear.controller";
 const router = Router();
 
 router.post("/", auth(Role.PROVIDER), GearController.createGear);
-
+router.put("/:id", auth(Role.PROVIDER), GearController.updateGear);
+router.delete("/:id", auth(Role.PROVIDER), GearController.deleteGear);
 export const ProviderGearRoutes = router;

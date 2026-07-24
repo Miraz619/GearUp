@@ -33,22 +33,54 @@ const getAllGear = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getSingleGear = catchAsync(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
+const getSingleGear = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-    const result = await GearService.getSingleGear(id as string);
+  const result = await GearService.getSingleGear(id as string);
 
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "Gear details retrieved successfully",
-      data: result,
-    });
-  },
-);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Gear details retrieved successfully",
+    data: result,
+  });
+});
+
+const updateGear = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const providerId = req.user!.id;
+
+  const result = await GearService.updateGear(
+    id as string,
+    providerId,
+    req.body,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Gear updated successfully",
+    data: result,
+  });
+});
+
+const deleteGear = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const providerId = req.user!.id;
+
+  const result = await GearService.deleteGear(id as string, providerId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Gear deleted successfully",
+    data: result,
+  });
+});
 export const GearController = {
   createGear,
   getAllGear,
-  getSingleGear
+  getSingleGear,
+  updateGear,
+  deleteGear
 };

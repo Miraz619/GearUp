@@ -198,6 +198,8 @@ const getSingleGear = async (gearId: string) => {
   return result;
 };
 
+
+
 const updateGear = async (
   gearId: string,
   providerId: string,
@@ -211,7 +213,9 @@ const updateGear = async (
   });
 
   if (Object.keys(payload).length === 0) {
-    const error = new Error("Provide at least one field to update") as Error & {
+    const error = new Error(
+      "Provide at least one field to update",
+    ) as Error & {
       statusCode: number;
     };
 
@@ -220,7 +224,10 @@ const updateGear = async (
     throw error;
   }
 
-  if (payload.pricePerDay !== undefined && payload.pricePerDay <= 0) {
+  if (
+    payload.pricePerDay !== undefined &&
+    payload.pricePerDay <= 0
+  ) {
     const error = new Error(
       "Price per day must be greater than zero",
     ) as Error & {
@@ -233,7 +240,9 @@ const updateGear = async (
   }
 
   if (payload.stock !== undefined && payload.stock < 0) {
-    const error = new Error("Stock cannot be negative") as Error & {
+    const error = new Error(
+      "Stock cannot be negative",
+    ) as Error & {
       statusCode: number;
     };
 
@@ -250,20 +259,15 @@ const updateGear = async (
     });
   }
 
-  let isAvailable = payload.isAvailable;
-
   if (payload.stock !== undefined) {
-    isAvailable = payload.stock > 0;
+    payload.isAvailable = payload.stock > 0;
   }
 
   const result = await prisma.gearItem.update({
     where: {
       id: gear.id,
     },
-    data: {
-      ...payload,
-      isAvailable,
-    },
+    data: payload,
     include: {
       category: true,
       provider: {
@@ -279,7 +283,11 @@ const updateGear = async (
   return result;
 };
 
-const deleteGear = async (gearId: string, providerId: string) => {
+
+const deleteGear = async (
+  gearId: string,
+  providerId: string,
+) => {
   const gear = await prisma.gearItem.findFirstOrThrow({
     where: {
       id: gearId,
@@ -314,11 +322,11 @@ const deleteGear = async (gearId: string, providerId: string) => {
 
   return result;
 };
-
 export const GearService = {
   createGear,
   getAllGear,
   getSingleGear,
   updateGear,
-  deleteGear,
+  deleteGear
+ 
 };
