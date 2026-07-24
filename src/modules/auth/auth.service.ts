@@ -2,23 +2,38 @@ import bcrypt from "bcrypt";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { IRegisterUser } from "./auth.interface";
-
+import httpStatus from "http-status";
 const registerUser = async (payload: IRegisterUser) => {
   const { name, email, password, role } = payload;
 
-  const existingUser = await prisma.user.findUnique({
+  const isUserExist = await prisma.user.findUnique({
     where: {
       email,
     },
   });
 
-  if (existingUser) {
-    throw new Error("A user already exists with this email");
+  if (isUserExist) {
+     const error = new Error("User is already registered") as Error & {
+    statusCode: number;
+  };
+
+  error.statusCode = httpStatus.CONFLICT;
+
+  throw error;
   }
 
-  if (role === "ADMIN") {
-    throw new Error("You cannot register as an admin");
-  }
+ 
+
+   if (role === "ADMIN") {
+  const error = new Error("You cannot register as an admin") as Error & {
+    statusCode: number;
+  };
+
+  error.statusCode = httpStatus.BAD_REQUEST;
+
+  throw error;
+}
+ 
 
   const hashedPassword = await bcrypt.hash(
     password,
