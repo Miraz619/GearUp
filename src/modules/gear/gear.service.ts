@@ -60,38 +60,95 @@ const createGear = async (providerId: string, payload: ICreateGear) => {
   return result;
 };
 
-const getAllGear = async (filters: IGearFilter) => {
-  const { category, brand, minPrice, maxPrice } = filters;
+const getAllGear = async (query: IGearFilter) => {
+  const limit = query.limit ? Number(query.limit) : 10;
+  const page = query.page ? Number(query.page) : 1;
 
-  const whereConditions: Prisma.GearItemWhereInput = {
+  const skip = (page - 1) * limit;
+
+  const sortBy = query.sortBy ? query.sortBy : "createdAt";
+
+  const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+
+  const andConditions: Prisma.GearItemWhereInput[] = [];
+
+  if (query.searchTerm) {
+    andConditions.push({
+      OR: [
+        {
+          name: {
+            contains: query.searchTerm,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: query.searchTerm,
+            mode: "insensitive",
+          },
+        },
+        {
+          brand: {
+            contains: query.searchTerm,
+            mode: "insensitive",
+          },
+        },
+      ],
+    });
+  }
+
+  if (query.category) {
+    andConditions.push({
+      categoryId: query.category,
+    });
+  }
+
+  if (query.brand) {
+    andConditions.push({
+      brand: {
+        contains: query.brand,
+        mode: "insensitive",
+      },
+    });
+  }
+
+ if (query.minPrice && query.maxPrice) {
+  andConditions.push({
+    pricePerDay: {
+      gte: Number(query.minPrice),
+      lte: Number(query.maxPrice),
+    },
+  });
+} else if (query.minPrice) {
+  andConditions.push({
+    pricePerDay: {
+      gte: Number(query.minPrice),
+    },
+  });
+} else if (query.maxPrice) {
+  andConditions.push({
+    pricePerDay: {
+      lte: Number(query.maxPrice),
+    },
+  });
+}
+
+  andConditions.push({
     isAvailable: true,
-  };
+  });
 
-  if (category) {
-    whereConditions.categoryId = category;
-  }
+  const gear = await prisma.gearItem.findMany({
+    where: {
+      AND: andConditions,
+    },
 
-  if (brand) {
-    whereConditions.brand = {
-      contains: brand,
-      mode: "insensitive",
-    };
-  }
+    take: limit,
+    skip,
 
-  if (minPrice || maxPrice) {
-    whereConditions.pricePerDay = {};
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
 
-    if (minPrice) {
-      whereConditions.pricePerDay.gte = Number(minPrice);
-    }
-
-    if (maxPrice) {
-      whereConditions.pricePerDay.lte = Number(maxPrice);
-    }
-  }
-
-  const result = await prisma.gearItem.findMany({
-    where: whereConditions,
     include: {
       category: true,
       provider: {
@@ -101,12 +158,23 @@ const getAllGear = async (filters: IGearFilter) => {
         },
       },
     },
-    orderBy: {
-      createdAt: "desc",
+  });
+
+  const totalGearCount = await prisma.gearItem.count({
+    where: {
+      AND: andConditions,
     },
   });
 
-  return result;
+  return {
+    data: gear,
+    meta: {
+      page,
+      limit,
+      total: totalGearCount,
+      totalPages: Math.ceil(totalGearCount / limit),
+    },
+  };
 };
 
 const getSingleGear = async (gearId: string) => {
@@ -120,6 +188,7 @@ const getSingleGear = async (gearId: string) => {
         select: {
           id: true,
           name: true,
+          email: true,
         },
       },
       reviews: true,
