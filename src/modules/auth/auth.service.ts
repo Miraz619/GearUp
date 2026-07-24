@@ -5,6 +5,8 @@ import jwt, { SignOptions } from "jsonwebtoken";
 import { ILoginUser, IRegisterUser } from "./auth.interface";
 import httpStatus from "http-status";
 import { jwtUtils } from "../../utils/jwt";
+
+
 const registerUser = async (payload: IRegisterUser) => {
   const { name, email, password, role } = payload;
 
@@ -140,7 +142,22 @@ const result = await prisma.user.findUnique({
     
 };
 
+const getMe = async (userId: string) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: userId,
+    },
+    omit: {
+      password: true,
+    },
+  });
+
+
+
+  return user;
+};
 export const AuthService = {
   registerUser,
-  loginUser
+  loginUser,
+  getMe
 };
