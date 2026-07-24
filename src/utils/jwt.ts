@@ -21,6 +21,19 @@ const CreateToken = (
      return token;
 };
 
+
+const verifyToken=(token: string, secret: string)=>{
+
+   try {
+     const verifiedToken=jwt.verify(token, secret);
+
+    return verifiedToken;
+   } catch (error:any) {
+    throw new Error(error.message);
+   }
+}
+
 export const jwtUtils = {
   CreateToken,
+  verifyToken
 };

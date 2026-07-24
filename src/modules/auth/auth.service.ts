@@ -124,9 +124,19 @@ const accessToken = jwtUtils.CreateToken(
   config.jwt_access_expires_in as SignOptions,
 );
 // console.log(accessToken);
+const result = await prisma.user.findUnique({
+  where: {
+    id: user.id,
+  },
+  omit: {
+    password: true,
+  },
+});
 
   return {
-    accessToken};
+    accessToken,
+    user: result
+  };
     
 };
 
