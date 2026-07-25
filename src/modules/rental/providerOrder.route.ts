@@ -7,4 +7,6 @@ const router = Router();
 
 router.get("/", auth(Role.PROVIDER), RentalController.getProviderOrders);
 
+router.patch("/:id",auth(Role.PROVIDER),RentalController.updateStatus,
+);
 export const ProviderOrderRoutes = router;

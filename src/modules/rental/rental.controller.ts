@@ -3,6 +3,7 @@ import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { RentalService } from "./rental.service";
+import { RentalStatus } from "../../../generated/prisma/enums";
 
 const createRental = catchAsync(async (req: Request, res: Response) => {
   const customerId = req.user!.id;
@@ -31,24 +32,39 @@ const getSingleRental = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getProviderOrders = catchAsync(
-  async (req: Request, res: Response) => {
-    const providerId = req.user!.id;
+const getProviderOrders = catchAsync(async (req: Request, res: Response) => {
+  const providerId = req.user!.id;
 
-    const result =
-      await RentalService.getProviderOrders(providerId);
+  const result = await RentalService.getProviderOrders(providerId);
 
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "Provider orders retrieved successfully",
-      data: result,
-    });
-  },
-);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Provider orders retrieved successfully",
+    data: result,
+  });
+});
 
+const updateStatus = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const providerId = req.user!.id;
+
+  const { status } = req.body as {
+    status: RentalStatus;
+  };
+
+  const result = await RentalService.updateStatus(id as string, providerId, status);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Rental order status updated successfully",
+    data: result,
+  });
+});
 export const RentalController = {
   createRental,
   getSingleRental,
-  getProviderOrders
+  getProviderOrders,
+  updateStatus
 };

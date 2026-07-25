@@ -1,6 +1,7 @@
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { ICreateRental } from "./rental.interface";
+import { RentalStatus } from "../../../generated/prisma/enums";
 
 const createRental = async (customerId: string, payload: ICreateRental) => {
   const { startDate, endDate, items } = payload;
@@ -210,9 +211,36 @@ const getProviderOrders = async (providerId: string) => {
 
   return result;
 };
+const updateStatus = async (
+  rentalId: string,
+  providerId: string,
+  status: RentalStatus,
+) => {
+  const result = await prisma.rentalOrder.update({
+    where: {
+      id: rentalId,
+      items: {
+        some: {
+          gearItem: {
+            providerId,
+          },
+        },
+      },
+    },
+    data: {
+      status,
+    },
+    include: {
+      items: true,
+    },
+  });
 
+  return result;
+};
 export const RentalService = {
   createRental,
   getSingleRental,
-  getProviderOrders
+  getProviderOrders,
+  updateStatus
+
 };

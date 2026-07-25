@@ -17,6 +17,9 @@ const config = {
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
 
   app_url: process.env.APP_URL,
+
+  stripe_secret_key: process.env.STRIPE_SECRET_KEY as string,
+  stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET as string,
 };
 
 export default config;
