@@ -35,8 +35,34 @@ const updateUser = catchAsync(
     });
   },
 );
+const getAllGear = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await AdminService.getAllGear();
 
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "All gear retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+const getAllRentals = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await AdminService.getAllRentals();
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "All rental orders retrieved successfully",
+      data: result,
+    });
+  },
+);
 export const AdminController = {
   getAllUsers,
   updateUser,
+  getAllGear,
+  getAllRentals
 };

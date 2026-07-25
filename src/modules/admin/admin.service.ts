@@ -35,7 +35,50 @@ const updateUser = async (
   return result;
 };
 
+const getAllGear = async () => {
+  const result = await prisma.gearItem.findMany({
+    include: {
+      provider: {
+        omit: {
+          password: true,
+        },
+      },
+      category: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return result;
+};
+
+const getAllRentals = async () => {
+  const result = await prisma.rentalOrder.findMany({
+    include: {
+      customer: {
+        omit: {
+          password: true,
+        },
+      },
+      items: {
+        include: {
+          gearItem: true,
+        },
+      },
+      payment: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return result;
+};
+
 export const AdminService = {
   getAllUsers,
   updateUser,
+  getAllGear,
+  getAllRentals
 };

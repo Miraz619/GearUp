@@ -38,9 +38,15 @@ const createReview = async (
     throw error;
   }
 
-  await prisma.gearItem.findUniqueOrThrow({
+    await prisma.rentalOrder.findFirstOrThrow({
     where: {
-      id: gearItemId,
+      customerId,
+      status: "RETURNED",
+      items: {
+        some: {
+          gearItemId,
+        },
+      },
     },
   });
 

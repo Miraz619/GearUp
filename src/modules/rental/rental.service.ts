@@ -241,6 +241,5 @@ export const RentalService = {
   createRental,
   getSingleRental,
   getProviderOrders,
-  updateStatus
-
+  updateStatus,
 };

@@ -8,5 +8,8 @@ const router = Router();
 router.get("/users", auth(Role.ADMIN), AdminController.getAllUsers);
 
 router.patch("/users/:id", auth(Role.ADMIN), AdminController.updateUser);
+router.get("/gear", auth(Role.ADMIN), AdminController.getAllGear);
+
+router.get("/rentals", auth(Role.ADMIN), AdminController.getAllRentals);
 
 export const AdminRoutes = router;

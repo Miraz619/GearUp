@@ -9,6 +9,7 @@ import router from "./routes";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import config from "./config";
 import { PaymentController } from "./modules/payment/payment.controller";
+import { notFound } from './middlewares/notFound';
 
 const app: Application = express();
 
@@ -33,6 +34,6 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 app.use("/api", router);
-
+app.use(notFound);
 app.use(globalErrorHandler);
 export default app;
