@@ -44,10 +44,7 @@ const createRental = async (customerId: string, payload: ICreateRental) => {
 
   const oneDay = 1000 * 60 * 60 * 24;
 
-  const rentalDays = Math.ceil(
-    (end.getTime() - now.getTime()) /
-      oneDay,
-  );
+  const rentalDays = Math.ceil((end.getTime() - now.getTime()) / oneDay);
 
   const result = await prisma.$transaction(async (tx) => {
     let totalAmount = 0;
@@ -165,6 +162,57 @@ const createRental = async (customerId: string, payload: ICreateRental) => {
   return result;
 };
 
+const getSingleRental = async (rentalId: string, customerId: string) => {
+  const result = await prisma.rentalOrder.findFirstOrThrow({
+    where: {
+      id: rentalId,
+      customerId,
+    },
+    include: {
+      items: true,
+    },
+  });
+
+  return result;
+};
+const getProviderOrders = async (providerId: string) => {
+  const result = await prisma.rentalOrder.findMany({
+    where: {
+      items: {
+        some: {
+          gearItem: {
+            providerId,
+          },
+        },
+      },
+    },
+    include: {
+      customer: {
+        omit: {
+          password: true,
+        },
+      },
+      items: {
+        where: {
+          gearItem: {
+            providerId,
+          },
+        },
+        include: {
+          gearItem: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return result;
+};
+
 export const RentalService = {
   createRental,
+  getSingleRental,
+  getProviderOrders
 };
