@@ -60,17 +60,7 @@ export const auth = (...requiredRoles: Role[]) => {
         },
       });
 
-    //   if (!user) {
-    //     const error = new Error(
-    //       "User does not exist",
-    //     ) as Error & {
-    //       statusCode: number;
-    //     };
-
-    //     error.statusCode = httpStatus.UNAUTHORIZED;
-
-    //     throw error;
-    //   }
+   
 
       if (!user.isActive) {
         const error = new Error(
