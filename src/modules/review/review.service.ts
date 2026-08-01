@@ -50,6 +50,24 @@ const createReview = async (
     },
   });
 
+  const existingReview = await prisma.review.findFirst({
+  where: {
+    customerId,
+    gearItemId,
+  },
+});
+
+if (existingReview) {
+  const error = new Error(
+    "You have already reviewed this gear",
+  ) as Error & {
+    statusCode: number;
+  };
+
+  error.statusCode = httpStatus.CONFLICT;
+  throw error;
+}
+
   const result = await prisma.review.create({
     data: {
       customerId,
@@ -65,6 +83,23 @@ const createReview = async (
   return result;
 };
 
+const getMyReviews = async (customerId: string) => {
+  const result = await prisma.review.findMany({
+    where: {
+      customerId,
+    },
+    include: {
+      gearItem: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return result;
+};
+
 export const ReviewService = {
   createReview,
+  getMyReviews
 };

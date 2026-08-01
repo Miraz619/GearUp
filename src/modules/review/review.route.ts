@@ -6,5 +6,5 @@ import { ReviewController } from "./review.controller";
 const router = Router();
 
 router.post("/", auth(Role.CUSTOMER), ReviewController.createReview);
-
+router.get("/", auth(Role.CUSTOMER), ReviewController.getMyReviews);
 export const ReviewRoutes = router;

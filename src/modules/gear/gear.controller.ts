@@ -4,6 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { GearService } from "./gear.service";
 
+
 const createGear = catchAsync(async (req: Request, res: Response) => {
   const providerId = req.user!.id;
 
@@ -97,6 +98,8 @@ const getProviderGear = catchAsync(
     });
   },
 );
+
+
 export const GearController = {
   createGear,
   getAllGear,
