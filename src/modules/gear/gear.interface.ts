@@ -1,10 +1,22 @@
 export interface ICreateGear {
   name: string;
   description?: string;
+  imageUrl?: string;
   brand: string;
   pricePerDay: number;
   stock: number;
   categoryId: string;
+}
+
+export interface IUpdateGear {
+  name?: string;
+  description?: string;
+  imageUrl?: string;
+  brand?: string;
+  pricePerDay?: number;
+  stock?: number;
+  categoryId?: string;
+  isAvailable?: boolean;
 }
 
 export interface IUpdateGear {

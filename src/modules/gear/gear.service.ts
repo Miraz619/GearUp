@@ -4,7 +4,15 @@ import { prisma } from "../../lib/prisma";
 import { ICreateGear, IGearFilter, IUpdateGear } from "./gear.interface";
 
 const createGear = async (providerId: string, payload: ICreateGear) => {
-  const { name, description, brand, pricePerDay, stock, categoryId } = payload;
+  const {
+  name,
+  description,
+  imageUrl,
+  brand,
+  pricePerDay,
+  stock,
+  categoryId,
+} = payload;
 
   if (pricePerDay <= 0) {
     const error = new Error(
@@ -38,6 +46,7 @@ const createGear = async (providerId: string, payload: ICreateGear) => {
     data: {
       name,
       description,
+      imageUrl,
       brand,
       pricePerDay,
       stock,
@@ -322,11 +331,35 @@ const deleteGear = async (
 
   return result;
 };
+
+const getProviderGear = async (providerId: string) => {
+  const result = await prisma.gearItem.findMany({
+    where: {
+      providerId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      category: true,
+      provider: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  return result;
+};
 export const GearService = {
   createGear,
   getAllGear,
   getSingleGear,
   updateGear,
-  deleteGear
+  deleteGear,
+  getProviderGear
  
 };

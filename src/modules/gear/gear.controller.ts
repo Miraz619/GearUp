@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
@@ -77,10 +77,31 @@ const deleteGear = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const getProviderGear = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    const providerId = req.user?.id;
+
+    const result =
+      await GearService.getProviderGear(providerId as string);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Provider gear retrieved successfully",
+      data: result,
+    });
+  },
+);
 export const GearController = {
   createGear,
   getAllGear,
   getSingleGear,
   updateGear,
-  deleteGear
+  deleteGear,
+  getProviderGear
 };

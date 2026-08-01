@@ -6,6 +6,12 @@ import { ILoginUser, IRegisterUser } from "./auth.interface";
 import httpStatus from "http-status";
 import { jwtUtils } from "../../utils/jwt";
 
+type TJwtPayload = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+};
 
 const registerUser = async (payload: IRegisterUser) => {
   const { name, email, password, role } = payload;
@@ -126,6 +132,12 @@ const accessToken = jwtUtils.CreateToken(
   config.jwt_access_expires_in as SignOptions,
 );
 // console.log(accessToken);
+
+const refreshToken = jwtUtils.CreateToken(
+  jwtPayload,
+  config.jwt_refresh_secret,
+  config.jwt_refresh_expires_in as SignOptions,
+);
 const result = await prisma.user.findUnique({
   where: {
     id: user.id,
@@ -137,10 +149,67 @@ const result = await prisma.user.findUnique({
 
   return {
     accessToken,
+    refreshToken,
     user: result
   };
     
 };
+
+
+const refreshAccessToken = async (refreshToken: string) => {
+  if (!refreshToken) {
+    const error = new Error(
+      "Refresh token is required",
+    ) as Error & {
+      statusCode: number;
+    };
+
+    error.statusCode = httpStatus.UNAUTHORIZED;
+
+    throw error;
+  }
+
+  const decodedToken = jwtUtils.verifyToken(
+    refreshToken,
+    config.jwt_refresh_secret,
+  ) as TJwtPayload;
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: decodedToken.id,
+    },
+  });
+
+  if (!user.isActive) {
+    const error = new Error(
+      "Your account has been suspended",
+    ) as Error & {
+      statusCode: number;
+    };
+
+    error.statusCode = httpStatus.FORBIDDEN;
+
+    throw error;
+  }
+
+  const jwtPayload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtUtils.CreateToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as SignOptions,
+  );
+
+  return {
+    accessToken,
+  };
+};
+
 
 const getMe = async (userId: string) => {
   const user = await prisma.user.findUniqueOrThrow({
@@ -159,5 +228,6 @@ const getMe = async (userId: string) => {
 export const AuthService = {
   registerUser,
   loginUser,
-  getMe
+  getMe,
+  refreshAccessToken
 };

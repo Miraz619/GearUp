@@ -2,7 +2,7 @@ import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
 import { handleCheckoutCompleted } from "./payment.utils";
-
+import { RentalStatus } from "../../../generated/prisma/enums";
 const createCheckoutSession = async (
   customerId: string,
   rentalOrderId: string,
@@ -18,6 +18,18 @@ const createCheckoutSession = async (
       },
     });
 
+if (rentalOrder.status !== RentalStatus.CONFIRMED) {
+  throw new Error(
+    "Only confirmed rental orders can be paid",
+  );
+}
+
+const totalAmount = Number(rentalOrder.totalAmount);
+
+if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+  throw new Error("Rental order amount is invalid");
+}
+
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -26,7 +38,7 @@ const createCheckoutSession = async (
 
             product: config.stripe_product_id,
 
-            unit_amount: Number(rentalOrder.totalAmount) * 100,
+            unit_amount: Math.round(totalAmount * 100),
           },
 
           quantity: 1,
