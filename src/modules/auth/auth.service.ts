@@ -212,20 +212,35 @@ const googleLogin = async (payload: IGoogleLogin) => {
     For safety, existing ADMIN and PROVIDER accounts
     continue using normal password login.
   */
-  if (
-    user &&
-    (user.role === "ADMIN" ||
-      user.role === "PROVIDER")
-  ) {
-    const error = new Error(
-      "Please use your email and password to access this account",
-    ) as Error & {
-      statusCode: number;
-    };
+let user = await prisma.user.findUnique({
+  where: {
+    email,
+  },
+});
 
-    error.statusCode = httpStatus.FORBIDDEN;
-    throw error;
-  }
+if (!user) {
+  const randomPassword =
+    crypto.randomBytes(32).toString("hex");
+
+  const hashedPassword = await bcrypt.hash(
+    randomPassword,
+    Number(config.bcrypt_salt_rounds),
+  );
+
+  const userName =
+    googlePayload.name?.trim() ||
+    email.split("@")[0] ||
+    "Google User";
+
+  user = await prisma.user.create({
+    data: {
+      name: userName,
+      email,
+      password: hashedPassword,
+      role: "CUSTOMER",
+    },
+  });
+}
 
   /*
     First Google login:
