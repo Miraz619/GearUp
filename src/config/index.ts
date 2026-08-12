@@ -14,7 +14,7 @@ const config = {
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
 
   app_url: process.env.APP_URL,
-   google_client_id: process.env.GOOGLE_CLIENT_ID!,
+  google_client_id: process.env.GOOGLE_CLIENT_ID!,
   stripe_secret_key: process.env.STRIPE_SECRET_KEY as string,
   stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET as string,
   stripe_product_id: process.env.STRIPE_PRODUCT_ID as string,
