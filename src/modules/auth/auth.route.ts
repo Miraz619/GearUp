@@ -6,6 +6,10 @@ const router = Router();
 
 router.post("/register", AuthController.registerUser);
 router.post("/login", AuthController.loginUser);
+router.post(
+  "/google",
+  AuthController.googleLogin,
+);
 router.get("/me", auth(), AuthController.getMe);
 router.post("/refresh-token", AuthController.refreshAccessToken);
 export const AuthRoutes = router;
