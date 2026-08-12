@@ -164,6 +164,7 @@ const result = await prisma.user.findUnique({
     
 };
 
+
 const googleLogin = async (payload: IGoogleLogin) => {
   const { credential } = payload;
 
@@ -202,74 +203,39 @@ const googleLogin = async (payload: IGoogleLogin) => {
 
   const email = googlePayload.email;
 
+  // Check whether the user already exists
   let user = await prisma.user.findUnique({
     where: {
       email,
     },
   });
 
-  /*
-    For safety, existing ADMIN and PROVIDER accounts
-    continue using normal password login.
-  */
-let user = await prisma.user.findUnique({
-  where: {
-    email,
-  },
-});
+  // First Google login: create a CUSTOMER account
+  if (!user) {
+    const randomPassword =
+      crypto.randomBytes(32).toString("hex");
 
-if (!user) {
-  const randomPassword =
-    crypto.randomBytes(32).toString("hex");
+    const hashedPassword = await bcrypt.hash(
+      randomPassword,
+      Number(config.bcrypt_salt_rounds),
+    );
 
-  const hashedPassword = await bcrypt.hash(
-    randomPassword,
-    Number(config.bcrypt_salt_rounds),
-  );
+    const userName =
+      googlePayload.name?.trim() ||
+      email.split("@")[0] ||
+      "Google User";
 
-  const userName =
-    googlePayload.name?.trim() ||
-    email.split("@")[0] ||
-    "Google User";
+    user = await prisma.user.create({
+      data: {
+        name: userName,
+        email,
+        password: hashedPassword,
+        role: "CUSTOMER",
+      },
+    });
+  }
 
-  user = await prisma.user.create({
-    data: {
-      name: userName,
-      email,
-      password: hashedPassword,
-      role: "CUSTOMER",
-    },
-  });
-}
-
-  /*
-    First Google login:
-    create a CUSTOMER account automatically.
-  */
- if (!user) {
-  const randomPassword =
-    crypto.randomBytes(32).toString("hex");
-
-  const hashedPassword = await bcrypt.hash(
-    randomPassword,
-    Number(config.bcrypt_salt_rounds),
-  );
-
-  const userName =
-    googlePayload.name?.trim() ||
-    email.split("@")[0] ||
-    "Google User";
-
-  user = await prisma.user.create({
-    data: {
-      name: userName,
-      email,
-      password: hashedPassword,
-      role: "CUSTOMER",
-    },
-  });
-}
-
+  // Block suspended accounts
   if (!user.isActive) {
     const error = new Error(
       "Your account has been suspended",
@@ -288,29 +254,26 @@ if (!user) {
     role: user.role,
   };
 
-  const accessToken =
-    jwtUtils.CreateToken(
-      jwtPayload,
-      config.jwt_access_secret,
-      config.jwt_access_expires_in as SignOptions,
-    );
+  const accessToken = jwtUtils.CreateToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as SignOptions,
+  );
 
-  const refreshToken =
-    jwtUtils.CreateToken(
-      jwtPayload,
-      config.jwt_refresh_secret,
-      config.jwt_refresh_expires_in as SignOptions,
-    );
+  const refreshToken = jwtUtils.CreateToken(
+    jwtPayload,
+    config.jwt_refresh_secret,
+    config.jwt_refresh_expires_in as SignOptions,
+  );
 
-  const safeUser =
-    await prisma.user.findUnique({
-      where: {
-        id: user.id,
-      },
-      omit: {
-        password: true,
-      },
-    });
+  const safeUser = await prisma.user.findUnique({
+    where: {
+      id: user.id,
+    },
+    omit: {
+      password: true,
+    },
+  });
 
   return {
     accessToken,
