@@ -177,10 +177,32 @@ const getMe = catchAsync(async (req: Request, res: Response, next:NextFunction) 
   });
 });
 
+
+const updateMe = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+  ) => {
+    const result =
+      await AuthService.updateProfile(
+        req.user?.id as string,
+        req.body,
+      );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message:
+        "Profile updated successfully",
+      data: result,
+    });
+  },
+);
 export const AuthController = {
   registerUser,
   loginUser,
   googleLogin,
   getMe,
-  refreshAccessToken
+  refreshAccessToken,
+  updateMe
 };

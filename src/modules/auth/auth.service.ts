@@ -350,10 +350,67 @@ const getMe = async (userId: string) => {
 
   return user;
 };
+
+const updateProfile = async (
+  userId: string,
+  payload: { name: string },
+) => {
+  const name = payload.name?.trim();
+
+  if (!name) {
+    const error = new Error(
+      "Name is required",
+    ) as Error & {
+      statusCode: number;
+    };
+
+    error.statusCode = httpStatus.BAD_REQUEST;
+    throw error;
+  }
+
+  if (name.length < 2) {
+    const error = new Error(
+      "Name must be at least 2 characters",
+    ) as Error & {
+      statusCode: number;
+    };
+
+    error.statusCode = httpStatus.BAD_REQUEST;
+    throw error;
+  }
+
+  if (name.length > 60) {
+    const error = new Error(
+      "Name cannot exceed 60 characters",
+    ) as Error & {
+      statusCode: number;
+    };
+
+    error.statusCode = httpStatus.BAD_REQUEST;
+    throw error;
+  }
+
+  const user = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+
+    data: {
+      name,
+    },
+
+    omit: {
+      password: true,
+    },
+  });
+
+  return user;
+};
 export const AuthService = {
   registerUser,
   loginUser,
   googleLogin,
   getMe,
-  refreshAccessToken
+  refreshAccessToken,
+  updateProfile
 };

@@ -11,5 +11,10 @@ router.post(
   AuthController.googleLogin,
 );
 router.get("/me", auth(), AuthController.getMe);
+router.patch(
+  "/me",
+  auth(),
+  AuthController.updateMe,
+);
 router.post("/refresh-token", AuthController.refreshAccessToken);
 export const AuthRoutes = router;
